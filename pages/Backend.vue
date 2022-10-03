@@ -133,7 +133,9 @@ const data = reactive({
   backEndData: [],
   data1: [],
   name: "",
+  
   colorName: "",
+
   drawTool: null,
 });
 
@@ -282,7 +284,7 @@ async function savename() {
     Property: colorName,
     Geom: Geom,
   };
-  await $fetch("http://localhost:3001/geometry", {
+  await $fetch("http://localhost:3001/mapg", {
     method: "POST",
     body: formData,
   })
@@ -308,7 +310,7 @@ function randomFly(a, type) {
   //   });
 }
 async function getAllData() {
-  const res: any = await $fetch("http://localhost:3001/geometry");
+  const res: any = await $fetch("http://localhost:3001/mapg");
   data.backEndData = res;
 }
 </script>
