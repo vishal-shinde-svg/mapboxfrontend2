@@ -60,9 +60,9 @@
         </tr>
         <ul>
           <tr>
-            <li v-for="(item, index) in data.layears">
+            <li v-for="(item, index) in data.backEndData">
               <td>
-                <label for="checkBox"> {{ item.name }}</label>
+                <label for="checkBox"> {{ item.Name }}</label>
               </td>
               <td>
                 <input
@@ -104,7 +104,7 @@ import Mapbox from "mapbox-gl";
 import { VMap } from "v-mapbox";
 import mapboxgl from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
-// import { anyTypeAnnotation } from "@babel/types";
+import { anyTypeAnnotation } from "@babel/types";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
@@ -130,11 +130,14 @@ const data = reactive({
   } as mapboxgl.MapboxOptions,
   map: {} as mapboxgl.Map,
   layears: [],
+  backEndData: [],
   data1: [],
   name: "",
   colorName: "",
   drawTool: null,
 });
+
+getAllData();
 async function onMapLoaded(tempMap: mapboxgl.Map) {
   data.map = tempMap;
   mapboxgl.accessToken =
@@ -220,29 +223,32 @@ async function onMapLoaded(tempMap: mapboxgl.Map) {
     // console.log(coordinates);
     // console.log(type1);
   }
+
+  console.log(data.backEndData);
 }
 //////////////////////////////////////// Togale function  this function is used to show and hide layears
 
 function toggle(e, index) {
-  console.log(data.layears[index]);
-
+  console.log(data.backEndData[index]);
+  console.log(data.backEndData[index].Id);
   console.log(e.target.checked);
   if (e.target.checked == true) {
     console.log(data.layears[index]);
-    data.map.addSource(data.layears[index].data.id, {
+    data.map.addSource(data.backEndData[index].Id, {
       type: "geojson",
-      data: data.layears[index].data,
+      data: data.backEndData[index].Geom,
     });
     data.map.addLayer({
-      id: data.layears[index].data.id,
-      source: data.layears[index].data.id,
+      id: data.backEndData[index].Id,
+      source: data.backEndData[index].Id,
       type: "fill",
       layout: {},
       paint: {
-        "fill-color": data.layears[index].colorName,
+        "fill-color": data.backEndData[index].Property,
         "fill-opacity": 0.5,
       },
     });
+
     // let flylocation = data.layears[index].data.coordinates[0];
     console.log(data.layears[index].data.geometry.coordinates[0][0]);
     console.log(data.layears[index].data.geometry.type);
@@ -259,8 +265,8 @@ function toggle(e, index) {
     }
     // randomFly(flylocation);
   } else {
-    data.map.removeLayer(data.layears[index].data.id);
-    data.map.removeSource(data.layears[index].data.id);
+    data.map.removeLayer(data.backEndData[index].Id);
+    data.map.removeSource(data.backEndData[index].Id);
   }
   // console.log(data.layears[index].geometry.coordinates);
 }
@@ -272,7 +278,6 @@ async function savename() {
   document.getElementById("fromDiv").style.display = "none";
 
   let formData = {
-    Id: ID,
     Name: name,
     Property: colorName,
     Geom: Geom,
@@ -284,6 +289,7 @@ async function savename() {
     .then((res) => console.log("Data has been save successfully"))
     .catch((err) => alert(err));
   data.name = "";
+  getAllData();
 }
 function randomFly(a, type) {
   data.map.flyTo({
@@ -300,6 +306,10 @@ function randomFly(a, type) {
   //     center: [(Math.random() - 0.5) * 360, (Math.random() - 0.5) * 100],
   //     essential: true, // this animation is considered essential with respect to prefers-reduced-motion
   //   });
+}
+async function getAllData() {
+  const res: any = await $fetch("http://localhost:3001/geometry");
+  data.backEndData = res;
 }
 </script>
 <style scoped>
